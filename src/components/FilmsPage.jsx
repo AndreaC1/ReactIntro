@@ -5,6 +5,7 @@ import "./FilmsPage.css";
 function FilmsPage() {
 
     const [movies, setMovies] = useState([]);
+   
 
 
     function fetchEffect() {
@@ -30,6 +31,7 @@ function FilmsPage() {
     return (
         <>
             <h1>Films Page</h1>
+        
             <ul>
                 {movies.map((movie) => {
                     return <li key={movie.id}>

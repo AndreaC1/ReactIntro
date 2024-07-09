@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { filterFilmsByDirector } from "../helpers/film.helpers";
+import { filterFilmsByDirector, getFilmsStats } from "../helpers/film.helpers";
 import { getListOf } from "../helpers/film.helpers";
-
+import { Link } from "react-router-dom";
 
 
 function FilmsPage() {
@@ -23,7 +23,6 @@ function FilmsPage() {
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
                 setMovies(data);
 
             })
@@ -34,27 +33,27 @@ function FilmsPage() {
     useEffect(fetchEffect, []);
 
 
-    function sortMovies(films, sortType){
-        switch(sortType){
+    function sortMovies(films, sortType) {
+        switch (sortType) {
             case "releaseDate":
-                return films.toSorted((a,b) => a.release_date - b.release_date);
+                return films.toSorted((a, b) => a.release_date - b.release_date);
             case "director":
                 return films.toSorted((a, b) => {
-                    if(a.director > b.director){
+                    if (a.director > b.director) {
                         return 1;
-                    }else if(a.director < b.director){
+                    } else if (a.director < b.director) {
                         return -1;
-                    }else{
+                    } else {
                         return 0;
                     }
                 })
             case "title":
                 return films.toSorted((a, b) => {
-                    if(a.title > b.title){
+                    if (a.title > b.title) {
                         return 1;
-                    }else if(a.title < b.title){
+                    } else if (a.title < b.title) {
                         return -1;
-                    }else{
+                    } else {
                         return 0;
                     }
                 })
@@ -68,53 +67,71 @@ function FilmsPage() {
     const filteredMovies = filterFilmsByDirector(sortedMovies, searchDirector)
 
     let uniqueDirectors = getListOf(movies, "director");
+    getFilmsStats(movies);
+    let { avg_score, total, latest } = getFilmsStats(filteredMovies);
 
     return (
         <>
             <h1>Studio Ghibli Films</h1>
             <label htmlFor="sortSelect"> Sort by</label>
-            <select name="sortSelect" id="sortSelect" value={sortSelection} onChange={(changeEvent) =>{
+            <select name="sortSelect" id="sortSelect" value={sortSelection} onChange={(changeEvent) => {
                 setSortSelection(changeEvent.target.value)
             }}>
-            <option value="releaseDate">Release Date</option>
+                <option value="releaseDate">Release Date</option>
                 <option value="director">Director</option>
                 <option value="title">Title</option>
                 <option value="score">Rotten Tomatoes Score</option>
             </select>
-      
+
             <form action="">
                 <div className="form-group">
-                <label htmlFor="searchDirector">Search Director</label>
-        <select 
-        type="text" 
-        id="searchDirector"
-        name="searchDirector" 
-         onChange={handleInputChange}
-        value = {searchDirector}>
+                    <label htmlFor="searchDirector">Search Director</label>
+                    <select
+                        type="text"
+                        id="searchDirector"
+                        name="searchDirector"
+                        onChange={handleInputChange}
+                        value={searchDirector}>
 
-        <option value="">All</option>
-        {uniqueDirectors.map((director, index)=>{
-            return <option key={director+index} value={director}>{director}</option>
-        })}
-        </select>
-        
+                        <option value="">All</option>
+                        {uniqueDirectors.map((director, index) => {
+                            return <option key={director + index} value={director}>{director}</option>
+                        })}
+                    </select>
+
                 </div>
+
             </form>
+
             <div>
+                <span># Of Films </span>
+                <span>{total}</span>
+            </div>
+            <div>
+                <span>Average Rating </span>
+                <span>{avg_score.toFixed(2)}</span>
+            </div>
+            <div>
+                <span>Latest Film </span>
+                <span>{latest}</span>
+            </div>
+
+
+
             <ul>
                 {filteredMovies.map((movie) => {
                     return <li key={movie.id}>
-                        <h2>{movie.title}</h2>
+                        <Link to={`/film/${movie.id}`}> <h2>{movie.title}</h2></Link>
                         <p>{movie.rt_score}</p>
                         <div className="movieInfo">
-                        <p>{movie.description}</p>
-                        <img src={movie.image} alt={movie.title}/>
+                            <p>{movie.description}</p>
+                            <img src={movie.image} alt={movie.title} />
                         </div>
                     </li>
                 })
                 }
             </ul>
-            </div>
+
         </>
     )
 
